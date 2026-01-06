@@ -1,0 +1,29 @@
+# Build results
+bin/
+obj/
+Debug/
+Release/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# OS files
+.DS_Store
+Thumbs.db
