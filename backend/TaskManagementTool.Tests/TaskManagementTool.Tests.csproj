@@ -18,4 +18,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TaskManagementTool.Application\TaskManagementTool.Application.csproj" />
+    <ProjectReference Include="..\TaskManagementTool.API\TaskManagementTool.API.csproj" />
+  </ItemGroup>
+
 </Project>
