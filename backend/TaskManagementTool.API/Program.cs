@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TaskManagementTool.Domain.Enums;
+using TaskManagementTool.Application.Interfaces;
+using TaskManagementTool.Application.Services;
 using TaskManagementTool.Infrasrtucure.Identity;
 using TaskManagementTool.Infrastructure.Data;
 using TaskManagementTool.Infrastructure.Identity;
@@ -21,6 +22,8 @@ builder.Services
     })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
     
 var app = builder.Build();
 
