@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaskManagementTool.Infrasrtucure.Identity;
+using TaskManagementTool.Infrastructure.Identity;
 public class ApplicationRoleConfiguration : IEntityTypeConfiguration<ApplicationRole>
 {
     public void Configure(EntityTypeBuilder<ApplicationRole> builder)

@@ -9,12 +9,14 @@ namespace TaskManagementTool.Application.Services
     public class IdentityRepository : IIdentityRepository
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public IdentityRepository(UserManager<ApplicationUser> userManager)
+        public IdentityRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
+            _roleManager = roleManager;
         }
-        public async Task<RegistrationResult> CreateUserAsync(RegisterDto dto, string role = "user")
+        public async Task<RegistrationResult> CreateUserAsync(RegisterDto dto, string roleName = "User")
         {
             var user = new ApplicationUser
             {
@@ -27,8 +29,12 @@ namespace TaskManagementTool.Application.Services
 
             if (!result.Succeeded)
                 throw new Exception("User creation failed");
+            
+            var role = await _roleManager.FindByNameAsync(roleName);
 
-            await _userManager.AddToRoleAsync(user, role);
+            if (role == null) { throw new Exception($"Role '{roleName}' does not exist."); }
+
+            await _userManager.AddToRoleAsync(user, role.Name);
 
             return new RegistrationResult
             {

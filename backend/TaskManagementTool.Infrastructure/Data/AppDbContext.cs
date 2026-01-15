@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using TaskManagementTool.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using TaskManagementTool.Infrastructure.Identity;
-using TaskManagementTool.Infrasrtucure.Identity;
 
 namespace TaskManagementTool.Infrastructure.Data
 { 

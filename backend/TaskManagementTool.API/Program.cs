@@ -1,13 +1,17 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TaskManagementTool.Application.Interfaces;
 using TaskManagementTool.Application.Services;
-using TaskManagementTool.Infrasrtucure.Identity;
 using TaskManagementTool.Infrastructure.Data;
 using TaskManagementTool.Infrastructure.Identity;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services
     .AddDbContext<AppDbContext>(
         options => options.UseSqlServer(
@@ -30,8 +34,21 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerDocumentUrlsPath = "/openapi/v1.json";
+    });
 }
 
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     await IdentitySeeder.SeedRolesAndAdmin(services);
+// }
+
+app.UseRouting();
+app.MapControllers();
 app.UseHttpsRedirection();
 
 app.Run();
