@@ -28,7 +28,11 @@ namespace TaskManagementTool.Application.Services
             var result = await _userManager.CreateAsync(user, dto.Password);
 
             if (!result.Succeeded)
-                throw new Exception("User creation failed");
+                return new RegistrationResult
+                {
+                    Succeeded = result.Succeeded,
+                    Errors = result.Errors.Select(e => e.Description)
+                };
             
             var role = await _roleManager.FindByNameAsync(roleName);
 
@@ -41,6 +45,22 @@ namespace TaskManagementTool.Application.Services
                 Succeeded = result.Succeeded,
                 Errors = result.Errors.Select(e => e.Description)
             };
+        }
+
+        public async Task<UserProfileDto?> FindByEmailAsync(string email)
+        {
+            ApplicationUser? appUser = await _userManager.FindByEmailAsync(email);
+            if (appUser == null) return null;
+            else
+            {
+                return new UserProfileDto
+                {
+                    UserName = appUser.UserName,
+                    Email = appUser.Email,
+                    FullName = appUser.FullName,
+                    PhoneNumber = appUser.PhoneNumber
+                };
+            }
         }
     }
 }

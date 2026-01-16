@@ -4,6 +4,7 @@ using TaskManagementTool.Application.DTOs;
 namespace TaskManagementTool.Application.Interfaces{
     public interface IIdentityRepository
     {
-        public Task<RegistrationResult> CreateUserAsync(RegisterDto registerDto, string role = "User");
+        Task<RegistrationResult> CreateUserAsync(RegisterDto registerDto, string role = "User");
+        Task<UserProfileDto?> FindByEmailAsync(string email);
     }
 }
