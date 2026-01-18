@@ -1,16 +1,17 @@
 using TaskManagementTool.Application.Common.Models;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
-
 namespace TaskManagementTool.Application.Services
 {
     public class AccountService : IAccountService
     {
         private readonly IIdentityRepository _identityRepository;
+        private readonly IJwtTokenService _jwtTokenService;
 
-        public AccountService(IIdentityRepository identityRepository)
+        public AccountService(IIdentityRepository identityRepository, IJwtTokenService jwtTokenService)
         {
             _identityRepository = identityRepository;
+            _jwtTokenService = jwtTokenService;
         }
 
         public async Task<RegistrationResult> RegisterAsync(RegisterDto dto)
@@ -60,6 +61,26 @@ namespace TaskManagementTool.Application.Services
             }
 
             return await _identityRepository.CreateUserAsync(dto);
+        }
+
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
+        {
+            var response = await _identityRepository.LoginAsync(dto);
+
+            if (response.Succeeded)
+            {
+                var token = await _jwtTokenService.GenerateTokenAsync(dto.Email);
+
+                return new LoginResponseDto
+                {
+                    Succeeded = true,
+                    Token = token
+                };
+            }
+            else
+            {
+                return response;
+            }
         }
     }
 }

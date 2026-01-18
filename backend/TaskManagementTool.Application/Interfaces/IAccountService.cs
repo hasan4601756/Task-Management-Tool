@@ -6,5 +6,6 @@ namespace TaskManagementTool.Application.Interfaces
     public interface IAccountService
     {
         Task<RegistrationResult> RegisterAsync(RegisterDto registerDto);
+        Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
     }
 }

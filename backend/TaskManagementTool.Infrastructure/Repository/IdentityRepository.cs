@@ -10,11 +10,13 @@ namespace TaskManagementTool.Application.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public IdentityRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public IdentityRepository(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _signInManager = signInManager;
         }
         public async Task<RegistrationResult> CreateUserAsync(RegisterDto dto, string roleName = "User")
         {
@@ -61,6 +63,40 @@ namespace TaskManagementTool.Application.Services
                     PhoneNumber = appUser.PhoneNumber
                 };
             }
+        }
+
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+            {
+                return new LoginResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Invalid Email." }
+                };
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                dto.Password,
+                dto.RememberMe,
+                lockoutOnFailure: true
+            );
+
+            if (!result.Succeeded)
+            {
+                return new LoginResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Invalid email or password." }
+                };
+            }
+            return new LoginResponseDto
+            {
+                Succeeded = true,
+                Errors = null
+            };
         }
     }
 }
