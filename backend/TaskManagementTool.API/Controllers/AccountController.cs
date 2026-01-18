@@ -37,5 +37,16 @@ namespace TaskManagementTool.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh(string RefreshToken)
+        {
+            var result = await _accountService.RefreshAsync(RefreshToken);
+
+            if (!result.Succeeded)
+                return Unauthorized();
+
+            return Ok(result);
+        }
     }
 }

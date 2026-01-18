@@ -12,6 +12,7 @@ namespace TaskManagementTool.Infrastructure.Data
 
         public DbSet<TaskItem> Tasks => Set<TaskItem>();
         public DbSet<TaskCategory> TaskCategories => Set<TaskCategory>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>(); 
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -20,5 +21,5 @@ namespace TaskManagementTool.Infrastructure.Data
             builder.ApplyConfigurationsFromAssembly(
                 typeof(AppDbContext).Assembly);
         }
-    }      
+    }
 }

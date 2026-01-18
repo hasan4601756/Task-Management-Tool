@@ -1,17 +1,35 @@
+using System.Security.Cryptography;
 using TaskManagementTool.Application.Common.Models;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
+using System.Text;
 namespace TaskManagementTool.Application.Services
 {
     public class AccountService : IAccountService
     {
         private readonly IIdentityRepository _identityRepository;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IRefreshTokenRepository _refreshTokenRepo;
 
-        public AccountService(IIdentityRepository identityRepository, IJwtTokenService jwtTokenService)
+        public AccountService(IIdentityRepository identityRepository, IJwtTokenService jwtTokenService, IRefreshTokenRepository refreshTokenRepo)
         {
             _identityRepository = identityRepository;
             _jwtTokenService = jwtTokenService;
+            _refreshTokenRepo = refreshTokenRepo;
+        }
+
+        public static string ComputeTokenHash(string token)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(token);
+            var hashBytes = sha256.ComputeHash(bytes);
+
+            var sb = new StringBuilder();
+            foreach (var b in hashBytes)
+            {
+                sb.Append(b.ToString("x2"));
+            }
+            return sb.ToString();
         }
 
         public async Task<RegistrationResult> RegisterAsync(RegisterDto dto)
@@ -70,17 +88,69 @@ namespace TaskManagementTool.Application.Services
             if (response.Succeeded)
             {
                 var token = await _jwtTokenService.GenerateTokenAsync(dto.Email);
+                var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
-                return new LoginResponseDto
-                {
-                    Succeeded = true,
-                    Token = token
-                };
+                var saved = await _refreshTokenRepo.AddAsync(ComputeTokenHash(refreshToken), dto.Email);
+                if (!saved)
+                    return new LoginResponseDto
+                    {
+                        Succeeded = false,
+                        Errors = new[]{"Problem in saving refresh token."}
+                    };
+                else
+                    return new LoginResponseDto
+                    {
+                        Succeeded = true,
+                        Token = token,
+                        RefreshToken = refreshToken
+                    };
             }
             else
             {
                 return response;
             }
+        }
+
+        public async Task<LoginResponseDto> RefreshAsync(string refreshToken)
+        {
+            var tokenHash = ComputeTokenHash(refreshToken);
+
+            var storedToken = await _refreshTokenRepo.GetByTokenHashAsync(tokenHash);
+            if (storedToken == null || !storedToken.IsActive)
+                return new LoginResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[]{"Incorrect Refresh token"}                    
+                };
+
+            await _refreshTokenRepo.RevokeAsync(storedToken);
+
+            var user = await _identityRepository.FindByIdAsync(storedToken.UserId);
+            if (user == null)
+                return new LoginResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[]{"The user with associated Refresh Token doesn't exists."}                    
+                };
+
+            var newJwt = await _jwtTokenService.GenerateTokenAsync(user.Email);
+            var newRefreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+            var saved = await _refreshTokenRepo.AddAsync(ComputeTokenHash(newRefreshToken), user.Email);
+
+            if (!saved)
+                return new LoginResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[]{"Problem in saving refresh token."}
+                };
+
+            return new LoginResponseDto
+            {
+                Succeeded = true,
+                Token = newJwt,
+                RefreshToken = newRefreshToken
+            };
         }
     }
 }

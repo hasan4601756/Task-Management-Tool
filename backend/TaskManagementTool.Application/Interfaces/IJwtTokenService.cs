@@ -1,3 +1,5 @@
+using TaskManagementTool.Domain.Entities;
+
 namespace TaskManagementTool.Application
 {
     public interface IJwtTokenService

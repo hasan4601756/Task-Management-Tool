@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TaskManagementTool.Application;
 using Microsoft.OpenApi.Models;
+using TaskManagementTool.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,7 @@ builder.Services
 builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -86,6 +88,12 @@ builder.Services.AddAuthorization();
     
 var app = builder.Build();
 
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     await IdentitySeeder.SeedRolesAndAdmin(services);
+// }
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -96,16 +104,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var services = scope.ServiceProvider;
-//     await IdentitySeeder.SeedRolesAndAdmin(services);
-// }
-
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseHttpsRedirection();
 
 app.Run();

@@ -7,5 +7,6 @@ namespace TaskManagementTool.Application.Interfaces
     {
         Task<RegistrationResult> RegisterAsync(RegisterDto registerDto);
         Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
+        Task<LoginResponseDto> RefreshAsync(string refreshToken);
     }
 }

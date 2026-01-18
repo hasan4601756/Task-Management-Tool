@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Common.Models;
 using TaskManagementTool.Application.Interfaces;
+using TaskManagementTool.Application;
 
-namespace TaskManagementTool.Application.Services
+namespace TaskManagementTool.Infrastructure.Repository
 {
     public class IdentityRepository : IIdentityRepository
     {
@@ -52,6 +53,22 @@ namespace TaskManagementTool.Application.Services
         public async Task<UserProfileDto?> FindByEmailAsync(string email)
         {
             ApplicationUser? appUser = await _userManager.FindByEmailAsync(email);
+            if (appUser == null) return null;
+            else
+            {
+                return new UserProfileDto
+                {
+                    UserName = appUser.UserName,
+                    Email = appUser.Email,
+                    FullName = appUser.FullName,
+                    PhoneNumber = appUser.PhoneNumber
+                };
+            }
+        }
+
+        public async Task<UserProfileDto?> FindByIdAsync(string id)
+        {
+            ApplicationUser? appUser = await _userManager.FindByIdAsync(id);
             if (appUser == null) return null;
             else
             {
