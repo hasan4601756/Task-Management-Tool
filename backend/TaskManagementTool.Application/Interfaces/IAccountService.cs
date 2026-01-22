@@ -8,5 +8,7 @@ namespace TaskManagementTool.Application.Interfaces
         Task<RegistrationResult> RegisterAsync(RegisterDto registerDto);
         Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
         Task<LoginResponseDto> RefreshAsync(string refreshToken);
+        Task<bool> LogoutAsync(string refreshToken);
+        Task LogoutAllAsync(string userId);
     }
 }

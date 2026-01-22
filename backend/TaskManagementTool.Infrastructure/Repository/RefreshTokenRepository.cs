@@ -44,7 +44,7 @@ namespace TaskManagementTool.Infrastructure.Repository
         public async Task RevokeAllForUserAsync(string userId)
         {
             var tokens = await _dbContext.RefreshTokens
-                .Where(rt => rt.UserId == userId)
+                .Where(rt => rt.UserId == userId && rt.RevokedAt == null)
                 .ToListAsync();
 
             foreach (var token in tokens)

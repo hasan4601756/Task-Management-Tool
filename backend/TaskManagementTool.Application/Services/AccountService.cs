@@ -152,5 +152,24 @@ namespace TaskManagementTool.Application.Services
                 RefreshToken = newRefreshToken
             };
         }
+
+        public async Task<bool> LogoutAsync(string refreshToken)
+        {
+            var tokenHash = ComputeTokenHash(refreshToken);
+
+            var storedToken = await _refreshTokenRepo
+                .GetByTokenHashAsync(tokenHash);
+
+            if (storedToken == null || !storedToken.IsActive)
+                return false;
+
+            await _refreshTokenRepo.RevokeAsync(storedToken);
+
+            return true;
+        }
+        public async Task LogoutAllAsync(string userId)
+        {
+            await _refreshTokenRepo.RevokeAllForUserAsync(userId);
+        }
     }
 }

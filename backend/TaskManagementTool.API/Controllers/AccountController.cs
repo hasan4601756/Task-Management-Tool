@@ -1,3 +1,4 @@
+Aded using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagementTool.Application;
@@ -47,6 +48,29 @@ namespace TaskManagementTool.API.Controllers
                 return Unauthorized();
 
             return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(string RefreshToken)
+        {
+            var result = await _accountService.LogoutAsync(RefreshToken);
+
+            if (!result)
+                return BadRequest("Invalid refresh token");
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("logout-all")]
+        public async Task<IActionResult> LogoutAll()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            await _accountService.LogoutAllAsync(userId!);
+
+            return NoContent();
         }
     }
 }
