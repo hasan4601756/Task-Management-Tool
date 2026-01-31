@@ -74,7 +74,7 @@ namespace TaskManagementTool.Application.Services
             }; 
         }
 
-        public async Task<ResponseDto> RemoveAsync(int taskId, string userId)
+        public async Task<ResponseDto> RemoveAsync(int taskId, string userId, bool isAdmin)
         {
             var task = await _taskRepo.GetTaskById(taskId);
 
@@ -85,7 +85,7 @@ namespace TaskManagementTool.Application.Services
                     Errors = new String[]{"No user with the given id."}
                 };
 
-            if (task.AssignedUserId != userId)
+            if (task.AssignedUserId != userId && !isAdmin)
                 return new ResponseDto(){
                     Succeeded = false,
                     Errors = new String[]{"Only task creator or Admin can remove the task."}
@@ -100,7 +100,7 @@ namespace TaskManagementTool.Application.Services
             };
         }
 
-        public async Task<ResponseDto> UpdateAsync(int taskId, TaskUpdationDto dto, string userId)
+        public async Task<ResponseDto> UpdateAsync(int taskId, TaskUpdationDto dto, string userId, bool isAdmin)
         {
             var task = await _taskRepo.GetTaskById(taskId);
 
@@ -111,7 +111,7 @@ namespace TaskManagementTool.Application.Services
                     Errors = new String[]{"No user with the given id."}
                 };
 
-            if (task.AssignedUserId != userId)
+            if (task.AssignedUserId != userId && !isAdmin)
                 return new ResponseDto(){
                     Succeeded = false,
                     Errors = new String[]{"Only task creator or Admin can remove the task."}

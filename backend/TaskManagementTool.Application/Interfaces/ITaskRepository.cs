@@ -8,5 +8,6 @@ namespace TaskManagementTool.Application.Interfaces{
         Task<IEnumerable<TaskItem>> GetTasksByUserAsync(string userId);
         Task<TaskItem?> GetTaskById(int taskId);
         Task<bool> DeleteTaskAsync(TaskItem task);
+        Task<IEnumerable<TaskItem>> GetAllTasks();
     }
 }

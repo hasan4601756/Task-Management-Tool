@@ -39,7 +39,9 @@ namespace TaskManagementTool.API.Controllers{
         public async Task<ActionResult> Update(TaskUpdationDto dto, int taskId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _taskService.UpdateAsync(taskId, dto, userId);
+            var isAdmin = User.IsInRole("Admin");
+
+            var response = await _taskService.UpdateAsync(taskId, dto, userId, isAdmin);
             return response.Succeeded ? Ok() : NotFound();
         }
 
@@ -47,7 +49,9 @@ namespace TaskManagementTool.API.Controllers{
         public async Task<ActionResult> Delete(int taskId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _taskService.RemoveAsync(taskId, userId);
+            var isAdmin = User.IsInRole("Admin");
+
+            var response = await _taskService.RemoveAsync(taskId, userId, isAdmin);
             return response.Succeeded ? Ok() : NotFound();
         }
     }

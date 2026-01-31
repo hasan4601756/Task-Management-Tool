@@ -42,6 +42,7 @@ namespace TaskManagementTool.Infrastructure.Repository
         {
             category.Name = dto.Name;
             category.Description = dto.Description;
+            _dbContext.TaskCategories.Update(category);
 
             return await _dbContext.SaveChangesAsync() > 0;
         }

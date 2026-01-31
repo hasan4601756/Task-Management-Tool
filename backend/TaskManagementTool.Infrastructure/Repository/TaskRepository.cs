@@ -20,6 +20,7 @@ namespace TaskManagementTool.Infrastructure.Repository{
 
         public async Task<bool> UpdateTaskAsync(TaskItem task)
         {
+            _dbContext.Tasks.Update(task);
             return await _dbContext.SaveChangesAsync() > 0;
         }
 
@@ -46,6 +47,13 @@ namespace TaskManagementTool.Infrastructure.Repository{
         {
             _dbContext.Tasks.Remove(task);
             return await _dbContext.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<TaskItem>> GetAllTasks()
+        {
+            var tasks = await _dbContext.Tasks.ToListAsync();
+
+            return tasks;
         }
     }
 }

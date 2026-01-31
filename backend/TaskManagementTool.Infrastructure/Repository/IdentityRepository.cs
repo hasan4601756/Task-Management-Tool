@@ -4,6 +4,7 @@ using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Common.Models;
 using TaskManagementTool.Application.Interfaces;
 using TaskManagementTool.Application;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaskManagementTool.Infrastructure.Repository
 {
@@ -113,7 +114,27 @@ namespace TaskManagementTool.Infrastructure.Repository
             {
                 Succeeded = true,
                 Errors = null
-            };
+            }; 
+        }
+
+        public async Task<IEnumerable<UserDto>> GetAllUsers()
+        {
+            var users =  await _userManager.Users.ToListAsync();
+
+            var userdtos = new List<UserDto>();
+
+            foreach (var user in users)
+            {
+                var userdto = new UserDto()
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email
+                };
+                userdtos.Add(userdto);
+            }
+
+            return userdtos;
         }
     }
 }
