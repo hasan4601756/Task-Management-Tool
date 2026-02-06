@@ -17,7 +17,7 @@ namespace TaskManagementTool.API.Controllers
             _adminService = adminService;
         }
 
-        [HttpGet("Users")]
+        [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers()
         {
             var users = await _adminService.GetAllUsers();
@@ -25,7 +25,7 @@ namespace TaskManagementTool.API.Controllers
             return Ok(users);
         }
 
-        [HttpGet("Tasks")]
+        [HttpGet("tasks")]
         public async Task<ActionResult<IEnumerable<TaskDto>>> GetAllTasks()
         {
             var tasks = await _adminService.GetAllTasks();
@@ -33,7 +33,7 @@ namespace TaskManagementTool.API.Controllers
             return Ok(tasks);
         }
 
-        [HttpPut("AssignTask/{taskId:int}/{userId}")]
+        [HttpPut("assigntask/{taskId:int}/{userId}")]
         public async Task<ActionResult<ResponseDto>> AssignTask(string userId, int taskId)
         {
             var response = await _adminService.AssignTask(userId, taskId);

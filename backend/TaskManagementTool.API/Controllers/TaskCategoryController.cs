@@ -17,7 +17,7 @@ namespace TaskManagementTool.API.Controllers
             _categoryRepo = categoryRepo;
         }
 
-        [HttpGet]
+        [HttpGet("categories")]
         public async Task<ActionResult<List<TaskCategoryDto>>> GetAll()
         {
             var categories = await _categoryRepo.GetAllAsync();
@@ -26,7 +26,7 @@ namespace TaskManagementTool.API.Controllers
         }
         
         [Authorize(Roles="Admin")]
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<ActionResult> Create(TaskCategoryCreationDto dto)
         {
             var result = await _categoryRepo.AddAsync(dto);
@@ -35,7 +35,7 @@ namespace TaskManagementTool.API.Controllers
         }
 
         [Authorize(Roles="Admin")]
-        [HttpPut("{categoryId:int}")] 
+        [HttpPut("update/{categoryId:int}")] 
         public async Task<ActionResult> Update(TaskCategoryDto dto, int categoryId)
         {
             var result = await _categoryRepo.UpdateAsync(categoryId, dto);
@@ -44,7 +44,7 @@ namespace TaskManagementTool.API.Controllers
         }
 
         [Authorize(Roles="Admin")]
-        [HttpDelete("{categoryId:int}")]
+        [HttpDelete("delete/{categoryId:int}")]
         public async Task<ActionResult> Delete(int categoryId)
         {
             var result = await _categoryRepo.RemoveAsync(categoryId);

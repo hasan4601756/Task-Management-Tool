@@ -13,6 +13,9 @@ public class ClassCategoryConfiguration : IEntityTypeConfiguration<TaskCategory>
         builder.Property(c => c.Name)
             .IsRequired()
             .HasMaxLength(100);
+        
+        builder.Property(tc => tc.isActive)
+            .HasDefaultValue(true);
 
         builder.HasMany(c => c.Tasks)
             .WithOne(t => t.Category)

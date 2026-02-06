@@ -54,7 +54,7 @@ namespace TaskManagementTool.Infrastructure.Repository
         public async Task<UserProfileDto?> FindByEmailAsync(string email)
         {
             ApplicationUser? appUser = await _userManager.FindByEmailAsync(email);
-            if (appUser == null) return null;
+            if (appUser == null || !appUser.isActive) return null;
             else
             {
                 return new UserProfileDto
@@ -70,7 +70,7 @@ namespace TaskManagementTool.Infrastructure.Repository
         public async Task<UserProfileDto?> FindByIdAsync(string id)
         {
             ApplicationUser? appUser = await _userManager.FindByIdAsync(id);
-            if (appUser == null) return null;
+            if (appUser == null || !appUser.isActive) return null;
             else
             {
                 return new UserProfileDto
@@ -86,7 +86,7 @@ namespace TaskManagementTool.Infrastructure.Repository
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null)
+            if (user == null || !user.isActive)
             {
                 return new LoginResponseDto
                 {

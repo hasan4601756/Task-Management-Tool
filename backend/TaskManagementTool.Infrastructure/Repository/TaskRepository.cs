@@ -28,7 +28,7 @@ namespace TaskManagementTool.Infrastructure.Repository{
         {
             var tasks = await _dbContext.Tasks
                 .Include(t => t.Category)
-                .Where(t => t.AssignedUserId == userId)
+                .Where(t => t.AssignedUserId == userId && t.isActive == true)
                 .ToListAsync();
 
             return tasks;
@@ -38,20 +38,22 @@ namespace TaskManagementTool.Infrastructure.Repository{
         {
             var task = await _dbContext.Tasks.FindAsync(taskId);
 
-            if (task == null) return null;  
+            if (task == null || !task.isActive) return null;  
 
             return task;
         }
 
         public async Task<bool> DeleteTaskAsync(TaskItem task)
         {
-            _dbContext.Tasks.Remove(task);
+            // _dbContext.Tasks.Remove(task);
+            task.isActive = false;
+            _dbContext.Tasks.Update(task);
             return await _dbContext.SaveChangesAsync() > 0;
         }
 
         public async Task<IEnumerable<TaskItem>> GetAllTasks()
         {
-            var tasks = await _dbContext.Tasks.ToListAsync();
+            var tasks = await _dbContext.Tasks.Where(t => t.isActive == true).ToListAsync();
 
             return tasks;
         }

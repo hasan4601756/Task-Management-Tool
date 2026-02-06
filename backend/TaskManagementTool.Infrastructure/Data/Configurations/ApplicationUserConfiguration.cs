@@ -8,6 +8,8 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
         builder.HasKey(u => u.Id); // IdentityUser already has Id
+        builder.Property(tc => tc.isActive)
+            .HasDefaultValue(true);
 
         builder.Property(u => u.FullName)
                .IsRequired()

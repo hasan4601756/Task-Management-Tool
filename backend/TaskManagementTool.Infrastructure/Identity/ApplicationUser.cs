@@ -7,5 +7,6 @@ namespace TaskManagementTool.Infrastructure.Identity
     {
         public string FullName { get; set; }
         public ICollection<TaskItem> Tasks { get; set; }
+        public bool isActive {get; set;} = true;
     }
 }

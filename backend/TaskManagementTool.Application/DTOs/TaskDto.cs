@@ -1,3 +1,5 @@
+using TaskManagementTool.Domain.Enums;
+
 namespace TaskManagementTool.Application.DTOs{
     public class TaskDto{
         public int Id {get; set;}
@@ -5,7 +7,7 @@ namespace TaskManagementTool.Application.DTOs{
         public string? Description {get; set;}
         public DateOnly DueDate {get; set;}
         public DateTime CreationDate {get; set;}
-        public TaskStatus TaskStatus {get; set;}
+        public TaskItemStatus TaskStatus {get; set;}
         public string CategoryName {get; set;}
         public string? CategoryDescription {get; set;}
     }

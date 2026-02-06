@@ -22,20 +22,25 @@ namespace TaskManagementTool.Infrastructure.Repository
 
         public async Task<bool> DeleteCategory(TaskCategory category)
         {
-            _dbContext.TaskCategories.Remove(category);
+            // _dbContext.TaskCategories.Remove(category);
+            category.isActive = false;
+            _dbContext.TaskCategories.Update(category);
             return await _dbContext.SaveChangesAsync() > 0;
         }
 
         public async Task<IEnumerable<TaskCategory>> GetCategories()
         {
             return await _dbContext.TaskCategories
+                .Where(tc => tc.isActive == true)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<TaskCategory?> GetCategory(int categoryId)
         {
-            return await _dbContext.TaskCategories.FindAsync(categoryId);
+            var category = await _dbContext.TaskCategories.FindAsync(categoryId);
+
+            return (category != null && category.isActive) ? category : null;
         }
 
         public async Task<bool> UpdateCategory(TaskCategory category, TaskCategoryDto dto)
@@ -49,7 +54,7 @@ namespace TaskManagementTool.Infrastructure.Repository
 
         public async Task<TaskCategory?> GetCategoryByName(string name)
         {
-            return await _dbContext.TaskCategories.Where(c => c.Name == name).FirstOrDefaultAsync();
+            return await _dbContext.TaskCategories.Where(c => c.Name == name && c.isActive == true).FirstOrDefaultAsync();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace TaskManagementTool.API.Controllers{
             _taskService = taskService;
         }
 
-        [HttpGet]
+        [HttpGet("tasks")]
         public async Task<ActionResult> GetAll()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -26,7 +26,7 @@ namespace TaskManagementTool.API.Controllers{
             return Ok(tasks);
         }
 
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<ActionResult> Create(TaskCreationDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -35,7 +35,7 @@ namespace TaskManagementTool.API.Controllers{
             return response.Succeeded ? Ok() : BadRequest();
         }
 
-        [HttpPut("{taskId:int}")]
+        [HttpPut("update/{taskId:int}")]
         public async Task<ActionResult> Update(TaskUpdationDto dto, int taskId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -45,7 +45,7 @@ namespace TaskManagementTool.API.Controllers{
             return response.Succeeded ? Ok() : NotFound();
         }
 
-        [HttpDelete("{taskId:int}")]
+        [HttpDelete("delete/{taskId:int}")]
         public async Task<ActionResult> Delete(int taskId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

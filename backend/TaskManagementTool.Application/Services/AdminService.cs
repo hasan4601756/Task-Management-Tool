@@ -1,7 +1,5 @@
-using System.Security.Principal;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
-using TaskManagementTool.Domain.Entities;
 
 namespace TaskManagementTool.Application.Services
 {

@@ -1,6 +1,6 @@
 namespace TaskManagementTool.Domain.Enums
 {
-    public enum TaskStatus
+    public enum TaskItemStatus
     {
         Pending = 1,
         Completed = 2,

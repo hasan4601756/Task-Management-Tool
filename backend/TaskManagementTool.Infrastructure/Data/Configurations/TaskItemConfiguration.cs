@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskManagementTool.Domain.Entities;
+using TaskManagementTool.Domain.Enums;
 using TaskManagementTool.Infrastructure.Identity;
 
 public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
@@ -26,6 +27,13 @@ public class TaskItemConfiguration : IEntityTypeConfiguration<TaskItem>
 
         builder.Property(t => t.TaskStatus)
             .IsRequired();
+
+        builder.Property(t => t.Priority)
+            .IsRequired()
+            .HasDefaultValue(TaskPriority.Low);
+
+        builder.Property(t => t.isActive)
+            .HasDefaultValue(true);
 
         builder.HasOne<ApplicationUser>()
             .WithMany()

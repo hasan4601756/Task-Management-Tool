@@ -8,6 +8,7 @@ using TaskManagementTool.Application.Interfaces;
 namespace TaskManagementTool.API.Controllers
 {
     [ApiController]
+    [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
