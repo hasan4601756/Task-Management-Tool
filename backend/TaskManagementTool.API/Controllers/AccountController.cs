@@ -17,6 +17,17 @@ namespace TaskManagementTool.API.Controllers
             _accountService = accountService;
         }
 
+        [Authorize]
+        [HttpGet("roles")]
+        public IActionResult GetUserRole()
+        {
+            var roles = User.FindAll(ClaimTypes.Role)
+                            .Select(r => r.Value)
+                            .ToList();
+
+            return Ok(roles);
+        }
+
         [HttpPost("register")]
         [Authorize(Roles="Admin")]
         public async Task<IActionResult> Register(RegisterDto request)
@@ -72,6 +83,41 @@ namespace TaskManagementTool.API.Controllers
             await _accountService.LogoutAllAsync(userId!);
 
             return NoContent();
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<ActionResult<UserProfileDto>> UserProfile(){
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null) return NotFound();
+
+            UserProfileDto? dto = await _accountService.GetUserProfileAsync(userId);
+
+            return dto == null ? NotFound() : Ok(dto);
+        }
+
+        [Authorize]
+        [HttpPut("profile/update")]
+        public async Task<ActionResult<ResponseDto>> UpdateUserProfile(UserProfileDto dto){
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null) return BadRequest();
+
+            return await _accountService.UpdateUserProfileAsync(userId, dto);
+        }
+
+        [Authorize]
+        [HttpDelete("profile/{routeId?}")]
+        public async Task<ActionResult<ResponseDto>> DeleteProfile(string? routeId)
+        {
+            var isAdmin = User.IsInRole("Admin");
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _accountService.DeleteUserProfile(userId, routeId, isAdmin);
+
+            return result.Succeeded ? Ok(result) : BadRequest(result);
         }
     }
 }

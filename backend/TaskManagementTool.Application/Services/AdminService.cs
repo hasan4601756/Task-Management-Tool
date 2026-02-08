@@ -46,12 +46,7 @@ namespace TaskManagementTool.Application.Services
                 {
                     Id = task.TaskItemId,
                     Title = task.Title,
-                    Description = task.Description,
-                    CreationDate = task.CreationDate,
-                    DueDate = task.DueDate,
                     TaskStatus = task.TaskStatus,
-                    CategoryName = task.Category?.Name,
-                    CategoryDescription = task.Category?.Description
                 });
             }
 

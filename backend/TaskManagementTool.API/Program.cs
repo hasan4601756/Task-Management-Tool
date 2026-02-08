@@ -90,6 +90,23 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddAuthorization();
+
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy("AllowReact",
+    policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000);
+});
     
 var app = builder.Build();
 
@@ -114,5 +131,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.UseCors("AllowReact");
 
 app.Run();

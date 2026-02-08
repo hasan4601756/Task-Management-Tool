@@ -136,5 +136,63 @@ namespace TaskManagementTool.Infrastructure.Repository
 
             return userdtos;
         }
+
+        public async Task<ResponseDto> UpdateUserProfile(string email, UserProfileDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null || !user.isActive) 
+                return new ResponseDto{
+                    Succeeded=false, 
+                    Errors=new string[]{"No user with the given email exists"}
+                };
+
+            user.Email = dto.Email;
+            user.UserName = dto.UserName;
+            user.FullName = dto.FullName;
+            user.PhoneNumber = dto.PhoneNumber;
+
+            var updated = await _userManager.UpdateAsync(user);
+
+            return new ResponseDto
+            {
+                Succeeded = updated.Succeeded,
+                Errors = updated.Errors.Select(e => e.Description).ToList()
+            };
+        }
+
+        public async Task<ResponseDto> DeleteUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "User not found." }
+                };
+            }
+
+            if (!user.isActive)
+            {
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "User is already deactivated." }
+                };
+            }
+
+            user.isActive = false;
+            var result = await _userManager.UpdateAsync(user);
+
+            return new ResponseDto
+            {
+                Succeeded = result.Succeeded,
+                Errors = result.Succeeded
+                    ? new List<string>()
+                    : result.Errors.Select(e => e.Description).ToList()
+            };
+        }
     }
 }

@@ -171,5 +171,60 @@ namespace TaskManagementTool.Application.Services
         {
             await _refreshTokenRepo.RevokeAllForUserAsync(userId);
         }
+
+        public async Task<UserProfileDto?> GetUserProfileAsync(string Id)
+        {
+            return await _identityRepository.FindByIdAsync(Id);
+        }
+
+        public async Task<ResponseDto> UpdateUserProfileAsync(string userId, UserProfileDto dto)
+        {
+            var user = await _identityRepository.FindByIdAsync(userId);
+
+            if (user == null) 
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new String[]{"User doesn't exists"}
+                };
+
+            if (await _identityRepository.FindByEmailAsync(dto.Email) != null && dto.Email != user.Email)
+            {
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Email is already registered." }
+                };
+            }
+            else
+            {
+                return await _identityRepository.UpdateUserProfile(user.Email, dto);
+            }
+        }
+
+        public async Task<ResponseDto> DeleteUserProfile(string? userId, string? routeId, bool isAdmin)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Authenticated user id is missing." }
+                };
+            }
+
+            var targetUserId = string.IsNullOrEmpty(routeId) ? userId : routeId;
+
+            if (!isAdmin && userId != targetUserId)
+            {
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Only admins can delete other users' profiles." }
+                };
+            }
+
+            return await _identityRepository.DeleteUserAsync(targetUserId);
+        }
     }
 }

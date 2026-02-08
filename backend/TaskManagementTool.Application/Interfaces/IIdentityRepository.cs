@@ -10,5 +10,7 @@ namespace TaskManagementTool.Application.Interfaces
         Task<UserProfileDto?> FindByIdAsync(string id);
         Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
         Task<IEnumerable<UserDto>> GetAllUsers(); 
+        Task<ResponseDto> UpdateUserProfile(string email, UserProfileDto dto);
+        Task<ResponseDto> DeleteUserAsync(string userId);
     }
 }

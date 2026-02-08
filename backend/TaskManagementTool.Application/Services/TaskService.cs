@@ -1,6 +1,7 @@
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
 using TaskManagementTool.Domain.Entities;
+using TaskManagementTool.Domain.Enums;
 
 namespace TaskManagementTool.Application.Services
 {
@@ -21,7 +22,8 @@ namespace TaskManagementTool.Application.Services
                 DueDate = dto.DueDate,
                 CreationDate = DateTime.UtcNow,
                 AssignedUserId = userId,
-                TaskCategoryId = dto.CategoryId
+                TaskCategoryId = dto.CategoryId,
+                TaskStatus = TaskItemStatus.Pending
             };
 
             var success = await _taskRepo.AddTaskAsync(task);
@@ -45,23 +47,21 @@ namespace TaskManagementTool.Application.Services
                 {
                     Id = task.TaskItemId,
                     Title = task.Title,
-                    Description = task.Description,
-                    CreationDate = task.CreationDate,
-                    DueDate = task.DueDate,
                     TaskStatus = task.TaskStatus,
-                    CategoryName = task.Category?.Name,
-                    CategoryDescription = task.Category?.Description
                 });
             }
 
             return dtos;
         }
 
-        public async Task<TaskDto?> GetAsync(int taskId)
+        public async Task<TaskDetailDto?> GetAsync(int taskId, string userId)
         {
             var task = await _taskRepo.GetTaskById(taskId);
 
-            return new TaskDto
+            if (task == null) return null;
+            else if(task.AssignedUserId != userId) return null;
+
+            return new TaskDetailDto
             {
                 Id = task.TaskItemId,
                     Title = task.Title,
@@ -69,6 +69,7 @@ namespace TaskManagementTool.Application.Services
                     CreationDate = task.CreationDate,
                     DueDate = task.DueDate,
                     TaskStatus = task.TaskStatus,
+                    CategoryId = task.TaskCategoryId,
                     CategoryName = task.Category?.Name,
                     CategoryDescription = task.Category?.Description
             }; 
@@ -108,7 +109,7 @@ namespace TaskManagementTool.Application.Services
                 return new ResponseDto()
                 {
                     Succeeded = false,
-                    Errors = new String[]{"No user with the given id."}
+                    Errors = new String[]{"No task with the given id."}
                 };
 
             if (task.AssignedUserId != userId && !isAdmin)
@@ -129,6 +130,22 @@ namespace TaskManagementTool.Application.Services
             {
                 Succeeded = false,
                 Errors = new String[]{"Something Unexpected happened"}
+            };
+        }
+
+        public async Task<DashboardDto> GetDashboardAsync(string userId)
+        {
+            var tasks = await _taskRepo.GetTasksByUserAsync(userId);
+
+            var counts = tasks
+                .GroupBy(t => t.TaskStatus)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return new DashboardDto
+            {
+                CompletedTasks = counts.GetValueOrDefault(TaskItemStatus.Completed),
+                InProgressTasks = counts.GetValueOrDefault(TaskItemStatus.InProgress),
+                PendingTasks = counts.GetValueOrDefault(TaskItemStatus.Pending),
             };
         }
     }
