@@ -7,6 +7,7 @@ namespace TaskManagementTool.Application.Interfaces
     {
         Task<RegistrationResult> CreateUserAsync(RegisterDto registerDto, string role = "User");
         Task<UserProfileDto?> FindByEmailAsync(string email);
+        Task<UserProfileDto?> FindByUsernameAsync(string username);
         Task<UserProfileDto?> FindByIdAsync(string id);
         Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
         Task<IEnumerable<UserDto>> GetAllUsers(); 

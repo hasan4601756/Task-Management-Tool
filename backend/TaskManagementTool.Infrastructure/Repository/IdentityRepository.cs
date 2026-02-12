@@ -67,6 +67,22 @@ namespace TaskManagementTool.Infrastructure.Repository
             }
         }
 
+        public async Task<UserProfileDto?> FindByUsernameAsync(string username)
+        {
+            ApplicationUser? appUser = await _userManager.FindByNameAsync(username);
+            if (appUser == null || !appUser.isActive) return null;
+            else
+            {
+                return new UserProfileDto
+                {
+                    UserName = appUser.UserName,
+                    Email = appUser.Email,
+                    FullName = appUser.FullName,
+                    PhoneNumber = appUser.PhoneNumber
+                };
+            }
+        }
+
         public async Task<UserProfileDto?> FindByIdAsync(string id)
         {
             ApplicationUser? appUser = await _userManager.FindByIdAsync(id);

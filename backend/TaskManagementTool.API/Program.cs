@@ -12,6 +12,8 @@ using System.Text;
 using TaskManagementTool.Application;
 using Microsoft.OpenApi.Models;
 using TaskManagementTool.Infrastructure.Repository;
+using Serilog;
+using TaskManagementTool.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +31,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Enter your JWT Acess Token",
         Reference = new OpenApiReference
         {
-            Id = JwtBearerDefaults.AuthenticationScheme,
+            Id = JwtBearerDefaults.AuthenticationScheme, 
             Type = ReferenceType.SecurityScheme
         }
     };
@@ -107,6 +109,14 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5000);
 });
+
+builder.Host.UseSerilog((context, config) => {
+    // config
+    //     .MinimumLevel.Information()
+    //     .WriteTo.Console();
+
+    config.ReadFrom.Configuration(context.Configuration);
+});
     
 var app = builder.Build();
 
@@ -126,6 +136,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
@@ -133,5 +144,16 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseCors("AllowReact");
+app.UseSerilogRequestLogging();
+app.Use(async (context, next) =>
+{
+    using (Serilog.Context.LogContext.PushProperty(
+        "TraceId",
+        context.TraceIdentifier))
+    {
+        await next();
+    }
+});
+
 
 app.Run();

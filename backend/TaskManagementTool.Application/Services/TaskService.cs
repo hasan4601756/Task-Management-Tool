@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
 using TaskManagementTool.Domain.Entities;
@@ -8,10 +9,12 @@ namespace TaskManagementTool.Application.Services
     public class TaskService : ITaskService
     {
         private readonly ITaskRepository _taskRepo;
+        private readonly ILogger<TaskService> _logger;
 
-        public TaskService(ITaskRepository taskRepo)
+        public TaskService(ITaskRepository taskRepo, ILogger<TaskService> logger)
         {
             _taskRepo = taskRepo;
+            _logger = logger;
         }
         public async Task<ResponseDto> AddAsync(TaskCreationDto dto, string userId)
         {
@@ -37,42 +40,56 @@ namespace TaskManagementTool.Application.Services
 
         public async Task<IEnumerable<TaskDto>> GetAllAsync(string userId)
         {
-            var tasks = await _taskRepo.GetTasksByUserAsync(userId);
-
-            var dtos = new List<TaskDto>();
-
-            foreach (var task in tasks)
+            try
             {
-                dtos.Add(new TaskDto
-                {
-                    Id = task.TaskItemId,
-                    Title = task.Title,
-                    TaskStatus = task.TaskStatus,
-                });
-            }
+                var tasks = await _taskRepo.GetTasksByUserAsync(userId);
 
-            return dtos;
+                var dtos = new List<TaskDto>();
+
+                foreach (var task in tasks)
+                {
+                    dtos.Add(new TaskDto
+                    {
+                        Id = task.TaskItemId,
+                        Title = task.Title,
+                        TaskStatus = task.TaskStatus,
+                    });
+                }
+
+                return dtos;
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex, "Unknown exception caught at GetAllAsync");
+                throw;
+            }
         }
 
         public async Task<TaskDetailDto?> GetAsync(int taskId, string userId)
         {
-            var task = await _taskRepo.GetTaskById(taskId);
-
-            if (task == null) return null;
-            else if(task.AssignedUserId != userId) return null;
-
-            return new TaskDetailDto
+            try
             {
-                Id = task.TaskItemId,
-                    Title = task.Title,
-                    Description = task.Description,
-                    CreationDate = task.CreationDate,
-                    DueDate = task.DueDate,
-                    TaskStatus = task.TaskStatus,
-                    CategoryId = task.TaskCategoryId,
-                    CategoryName = task.Category?.Name,
-                    CategoryDescription = task.Category?.Description
-            }; 
+                var task = await _taskRepo.GetTaskById(taskId);
+
+                if (task == null) return null;
+                else if(task.AssignedUserId != userId) return null;
+
+                return new TaskDetailDto
+                {
+                    Id = task.TaskItemId,
+                        Title = task.Title,
+                        Description = task.Description,
+                        CreationDate = task.CreationDate,
+                        DueDate = task.DueDate,
+                        TaskStatus = task.TaskStatus,
+                        CategoryId = task.TaskCategoryId,
+                        CategoryName = task.Category?.Name,
+                        CategoryDescription = task.Category?.Description
+                }; 
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex, "Unknown exception caught at GetAllAsync");
+                throw;
+            }
         }
 
         public async Task<ResponseDto> RemoveAsync(int taskId, string userId, bool isAdmin)
@@ -127,7 +144,7 @@ namespace TaskManagementTool.Application.Services
             var success = await _taskRepo.UpdateTaskAsync(task);
 
             return success ? new ResponseDto(){Succeeded = true} : new ResponseDto()
-            {
+            { 
                 Succeeded = false,
                 Errors = new String[]{"Something Unexpected happened"}
             };

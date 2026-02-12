@@ -3,6 +3,8 @@ using TaskManagementTool.Application.Common.Models;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
 using System.Text;
+using Microsoft.Extensions.Logging;
+
 namespace TaskManagementTool.Application.Services
 {
     public class AccountService : IAccountService
@@ -10,12 +12,14 @@ namespace TaskManagementTool.Application.Services
         private readonly IIdentityRepository _identityRepository;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokenRepository _refreshTokenRepo;
+        private readonly ILogger<AccountService> _logger;
 
-        public AccountService(IIdentityRepository identityRepository, IJwtTokenService jwtTokenService, IRefreshTokenRepository refreshTokenRepo)
+        public AccountService(IIdentityRepository identityRepository, IJwtTokenService jwtTokenService, IRefreshTokenRepository refreshTokenRepo, ILogger<AccountService> logger)
         {
             _identityRepository = identityRepository;
             _jwtTokenService = jwtTokenService;
             _refreshTokenRepo = refreshTokenRepo;
+            _logger = logger;
         }
 
         public static string ComputeTokenHash(string token)
@@ -39,26 +43,32 @@ namespace TaskManagementTool.Application.Services
             if (string.IsNullOrWhiteSpace(dto.Email))
                 errors.Add("Email is required.");
 
+            if (string.IsNullOrWhiteSpace(dto.UserName))
+                errors.Add("Username is required.");
+
             if (string.IsNullOrWhiteSpace(dto.Password))
                 errors.Add("Password is required.");
 
-            if (dto.Password != dto.ConfirmPassword)
-                errors.Add("Passwords do not match.");
+            else
+            {
+                if (dto.Password != dto.ConfirmPassword)
+                    errors.Add("Passwords do not match.");
 
-            if (dto.Password.Length < 6)
-                errors.Add("Password must be at least 6 characters long.");
+                if (dto.Password.Length < 6)
+                    errors.Add("Password must be at least 6 characters long.");
 
-            if (!dto.Password.Any(char.IsUpper))
-                errors.Add("Password must contain at least one uppercase letter.");
+                if (!dto.Password.Any(char.IsUpper))
+                    errors.Add("Password must contain at least one uppercase letter.");
 
-            if (!dto.Password.Any(char.IsLower))
-                errors.Add("Password must contain at least one lowercase letter.");
+                if (!dto.Password.Any(char.IsLower))
+                    errors.Add("Password must contain at least one lowercase letter.");
 
-            if (!dto.Password.Any(char.IsDigit))
-                errors.Add("Password must contain at least one digit.");
+                if (!dto.Password.Any(char.IsDigit))
+                    errors.Add("Password must contain at least one digit.");
 
-            if (!dto.Password.Any(ch => !char.IsLetterOrDigit(ch)))
-                errors.Add("Password must contain at least one non-alphanumeric character.");        
+                if (!dto.Password.Any(ch => !char.IsLetterOrDigit(ch)))
+                    errors.Add("Password must contain at least one non-alphanumeric character.");  
+            }      
 
             if (errors.Any())
             {
@@ -74,7 +84,16 @@ namespace TaskManagementTool.Application.Services
                 return new RegistrationResult
                 {
                     Succeeded = false,
-                    Errors = new[] { "Email is already registered." }
+                    Errors = new[] {  "Registration failed. Please verify your details." }
+                };
+            }
+
+            if (await _identityRepository.FindByUsernameAsync(dto.UserName) != null)
+            {
+                return new RegistrationResult
+                {
+                    Succeeded = false,
+                    Errors = new[] { "Username is already registered." }
                 };
             }
 
@@ -92,11 +111,14 @@ namespace TaskManagementTool.Application.Services
 
                 var saved = await _refreshTokenRepo.AddAsync(ComputeTokenHash(refreshToken), dto.Email);
                 if (!saved)
+                {
+                    _logger.LogError("Failed to persist refresh token after successful login. {Email}", dto.Email);
                     return new LoginResponseDto
                     {
                         Succeeded = false,
-                        Errors = new[]{"Problem in saving refresh token."}
+                        Errors = new[] { "Login failed. Please try again." }
                     };
+                }
                 else
                     return new LoginResponseDto
                     {
@@ -132,7 +154,7 @@ namespace TaskManagementTool.Application.Services
                     Succeeded = false,
                     Errors = new[]{"The user with associated Refresh Token doesn't exists."}                    
                 };
-
+ 
             var newJwt = await _jwtTokenService.GenerateTokenAsync(user.Email);
             var newRefreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
@@ -161,7 +183,10 @@ namespace TaskManagementTool.Application.Services
                 .GetByTokenHashAsync(tokenHash);
 
             if (storedToken == null || !storedToken.IsActive)
+            {
+                _logger.LogError("Refresh Token incorrect or the user used expired refresh token");
                 return false;
+            }
 
             await _refreshTokenRepo.RevokeAsync(storedToken);
 

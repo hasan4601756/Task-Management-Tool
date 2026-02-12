@@ -13,6 +13,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="serilog.AspNetCore" Version="9.*" />
+    <PackageReference Include="serilog.Settings.Configuration" Version="9.*" />
+    <PackageReference Include="serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.*" />
   </ItemGroup>
 

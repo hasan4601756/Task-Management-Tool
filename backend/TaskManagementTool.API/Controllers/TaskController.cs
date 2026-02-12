@@ -11,21 +11,36 @@ namespace TaskManagementTool.API.Controllers{
     public class TaskController : ControllerBase
     {
         private readonly ITaskService _taskService;
+        private readonly ILogger<TaskController> _logger;
 
-        public TaskController(ITaskService taskService)
+        public TaskController(
+            ITaskService taskService,
+            ILogger<TaskController> logger)
         {
             _taskService = taskService;
+            _logger = logger;
         }
 
-        [Authorize]
+        private string GetUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? throw new UnauthorizedAccessException("UserId claim missing");
+        }
+
         [HttpGet("dashboard")]
         public async Task<ActionResult> Dashboard()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
 
-            if (userId == null) return NotFound();
+            _logger.LogInformation(
+                "Dashboard requested by User {UserId}",
+                userId);
 
             var dashboard = await _taskService.GetDashboardAsync(userId);
+
+            _logger.LogInformation(
+                "Dashboard completed for User {UserId}",
+                userId);
 
             return Ok(dashboard);
         }
@@ -33,48 +48,155 @@ namespace TaskManagementTool.API.Controllers{
         [HttpGet("tasks")]
         public async Task<ActionResult> GetAll()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
+
+            _logger.LogInformation(
+                "GetAll requested by User {UserId}",
+                userId);
 
             var tasks = await _taskService.GetAllAsync(userId);
+
+            _logger.LogInformation(
+                "GetAll completed for User {UserId}",
+                userId);
+
             return Ok(tasks);
         }
 
         [HttpGet("tasks/{taskId:int}")]
         public async Task<ActionResult> GetDetail(int taskId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
 
-            var tasks = await _taskService.GetAsync(taskId, userId);
-            return Ok(tasks);
+            _logger.LogInformation(
+                "GetDetail requested for Task {TaskId} by User {UserId}",
+                taskId,
+                userId);
+
+            var task = await _taskService.GetAsync(taskId, userId);
+
+            if (task == null)
+            {
+                _logger.LogWarning(
+                    "GetDetail failed: Task {TaskId} not found for User {UserId}",
+                    taskId,
+                    userId);
+
+                return NotFound();
+            }
+
+            _logger.LogInformation(
+                "GetDetail completed for Task {TaskId} by User {UserId}",
+                taskId,
+                userId);
+
+            return Ok(task);
         }
 
         [HttpPost("add")]
-        public async Task<ActionResult> Create(TaskCreationDto dto)
+        public async Task<ActionResult> Create([FromBody] TaskCreationDto dto)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
+
+            _logger.LogInformation(
+                "Create requested by User {UserId}",
+                userId);
 
             var response = await _taskService.AddAsync(dto, userId);
-            return response.Succeeded ? Ok() : BadRequest();
+
+            if (!response.Succeeded)
+            {
+                _logger.LogWarning(
+                    "Create failed for User {UserId} | Errors {@errors}",
+                    userId, response.Errors);
+
+                return BadRequest();
+            }
+
+            _logger.LogInformation(
+                "Create completed for User {UserId}",
+                userId);
+
+            return Ok(response);
         }
 
         [HttpPut("update/{taskId:int}")]
-        public async Task<ActionResult> Update(TaskUpdationDto dto, int taskId)
+        public async Task<ActionResult> Update(
+            int taskId,
+            [FromBody] TaskUpdationDto dto)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
             var isAdmin = User.IsInRole("Admin");
 
-            var response = await _taskService.UpdateAsync(taskId, dto, userId, isAdmin);
-            return response.Succeeded ? Ok(response) : NotFound(response);
+            _logger.LogInformation(
+                "Update requested by {ActorType} {UserId} for Task {TaskId}",
+                isAdmin ? "Admin" : "User",
+                userId,
+                taskId);
+
+            var response = await _taskService.UpdateAsync(
+                taskId,
+                dto,
+                userId,
+                isAdmin);
+
+            if (!response.Succeeded)
+            {
+                _logger.LogWarning(
+                "Update failed by {ActorType} {UserId} for Task {TaskId} | Errors {@errors}",
+                isAdmin ? "Admin" : "User",
+                userId,
+                taskId,
+                response.Errors);
+
+                return BadRequest(new {error="Update failed"});
+            }
+
+            _logger.LogInformation(
+                "Update completed by {ActorType} {UserId} for Task {TaskId}",
+                isAdmin ? "Admin" : "User",
+                userId,
+                taskId);
+
+            return Ok();
         }
 
         [HttpDelete("delete/{taskId:int}")]
         public async Task<ActionResult> Delete(int taskId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = GetUserId();
             var isAdmin = User.IsInRole("Admin");
 
-            var response = await _taskService.RemoveAsync(taskId, userId, isAdmin);
-            return response.Succeeded ? Ok() : NotFound();
+            _logger.LogInformation(
+                "Delete requested by {ActorType} {UserId} for Task {TaskId}",
+                isAdmin ? "Admin" : "User",
+                userId,
+                taskId);
+
+            var response = await _taskService.RemoveAsync(
+                taskId,
+                userId,
+                isAdmin);
+
+            if (!response.Succeeded)
+            {
+                _logger.LogWarning(
+                "Delete failed by {ActorType} {UserId} for Task {TaskId} | Errors {@errors}",
+                isAdmin ? "Admin" : "User",
+                userId,
+                taskId,
+                response.Errors);
+
+                return BadRequest(new {error="Update failed"});
+            }
+
+            _logger.LogInformation(
+                "Delete completed by {ActorType} {UserId} for Task {TaskId}",
+                isAdmin ? "Admin" : "User",
+                userId,
+                taskId);
+
+            return Ok();
         }
     }
 }

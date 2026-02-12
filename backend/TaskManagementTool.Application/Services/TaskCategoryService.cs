@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
 using TaskManagementTool.Domain.Entities;
@@ -7,10 +8,12 @@ namespace TaskManagementTool.Application.Services
     public class TaskCategoryService : ITaskCategoryService
     {
         private readonly ITaskCategoryRepository _categoryRepo;
+        private readonly ILogger<TaskCategoryService> _logger;
 
-        public TaskCategoryService(ITaskCategoryRepository categoryRepo)
+        public TaskCategoryService(ITaskCategoryRepository categoryRepo, ILogger<TaskCategoryService> logger)
         {
             _categoryRepo = categoryRepo;
+            _logger = logger;
         }
         public async Task<ResponseDto> AddAsync(TaskCategoryCreationDto dto)
         {
@@ -39,27 +42,41 @@ namespace TaskManagementTool.Application.Services
 
         public async Task<IEnumerable<TaskCategoryDto>> GetAllAsync()
         {
-            var categories = await _categoryRepo.GetCategories();
-            return categories.Select(c => new TaskCategoryDto
-                {
-                    TaskCategoryId = c.TaskCategoryId,
-                    Name = c.Name,
-                    Description = c.Description!
-                });
+            try
+            {
+                var categories = await _categoryRepo.GetCategories();
+                return categories.Select(c => new TaskCategoryDto
+                    {
+                        TaskCategoryId = c.TaskCategoryId,
+                        Name = c.Name,
+                        Description = c.Description!
+                    });
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex, "GetAllAsync failed");
+                throw;
+            }
         }
 
         public async Task<TaskCategoryDto?> GetAsync(int categoryId)
         {
-            var category = await _categoryRepo.GetCategory(categoryId);
-
-            if (category == null) return null;
-
-            return new TaskCategoryDto
+            try
             {
-                Name = category.Name,
-                TaskCategoryId = category.TaskCategoryId,
-                Description = category.Description
-            };
+                var category = await _categoryRepo.GetCategory(categoryId);
+
+                if (category == null) return null;
+
+                return new TaskCategoryDto
+                {
+                    Name = category.Name,
+                    TaskCategoryId = category.TaskCategoryId,
+                    Description = category.Description
+                };
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex, "GetAsync failed");
+                throw;
+            }
         }
 
         public async Task<ResponseDto> RemoveAsync(int categoryId)
@@ -97,5 +114,5 @@ namespace TaskManagementTool.Application.Services
                 Errors = new String[]{"An unknown Error occured."}
             };
         }
-    }
+    } 
 }

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
 
@@ -7,11 +8,13 @@ namespace TaskManagementTool.Application.Services
     {
         private readonly IIdentityRepository _identityRepo;
         private readonly ITaskRepository _taskRepo;
+        private readonly ILogger<AdminService> _logger;
 
-        public AdminService(IIdentityRepository identityRepo, ITaskRepository taskRepo)
+        public AdminService(IIdentityRepository identityRepo, ITaskRepository taskRepo, ILogger<AdminService> logger)
         {
             _identityRepo = identityRepo;
             _taskRepo = taskRepo;
+            _logger = logger;
         }
         public async Task<ResponseDto> AssignTask(string userId, int taskId)
         {
@@ -37,40 +40,54 @@ namespace TaskManagementTool.Application.Services
 
         public async Task<IEnumerable<TaskDto>> GetAllTasks()
         {
-           var tasks = await _taskRepo.GetAllTasks();
-           var taskdto = new List<TaskDto>();
-
-           foreach (var task in tasks)
+            try
             {
-                taskdto.Add(new TaskDto
-                {
-                    Id = task.TaskItemId,
-                    Title = task.Title,
-                    TaskStatus = task.TaskStatus,
-                });
-            }
+                var tasks = await _taskRepo.GetAllTasks();
+                var taskdto = new List<TaskDto>();
 
-            return taskdto;
+                foreach (var task in tasks)
+                {
+                    taskdto.Add(new TaskDto
+                    {
+                        Id = task.TaskItemId,
+                        Title = task.Title,
+                        TaskStatus = task.TaskStatus,
+                    });
+                }
+
+                return taskdto;
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex,"Task fetch for Admin failed");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
-            var users = await _identityRepo.GetAllUsers();
-            var userdtos = new List<UserDto>();
-
-            foreach (var user in users)
+            try
             {
-                var userdto = new UserDto()
+                var users = await _identityRepo.GetAllUsers();
+                var userdtos = new List<UserDto>();
+
+                foreach (var user in users)
                 {
-                    UserId = user.UserId,
-                    UserName = user.UserName,
-                    Email = user.Email
-                };
+                    var userdto = new UserDto()
+                    {
+                        UserId = user.UserId,
+                        UserName = user.UserName,
+                        Email = user.Email
+                    };
 
-                userdtos.Add(userdto);
+                    userdtos.Add(userdto);
+                }
+
+                return userdtos;
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex, "User fetch for Admin failed");
+                throw;
             }
-
-            return userdtos;
         }
     }
 }

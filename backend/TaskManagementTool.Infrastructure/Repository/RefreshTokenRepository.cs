@@ -58,6 +58,9 @@ namespace TaskManagementTool.Infrastructure.Repository
         public async Task RevokeAsync(RefreshToken token)
         {
             token.RevokedAt = DateTime.UtcNow;
+
+            _dbContext.RefreshTokens.Update(token);
+
             await _dbContext.SaveChangesAsync();
         }
     }
