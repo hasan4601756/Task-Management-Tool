@@ -105,10 +105,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5000);
-});
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     options.ListenAnyIP(5000);
+// });
 
 builder.Host.UseSerilog((context, config) => {
     // config
@@ -120,11 +120,11 @@ builder.Host.UseSerilog((context, config) => {
     
 var app = builder.Build();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var services = scope.ServiceProvider;
-//     await IdentitySeeder.SeedRolesAndAdmin(services);
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await IdentitySeeder.SeedRolesAndAdmin(services);
+}
 
 if (app.Environment.IsDevelopment())
 {
