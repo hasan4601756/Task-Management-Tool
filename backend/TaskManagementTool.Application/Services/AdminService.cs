@@ -27,6 +27,13 @@ namespace TaskManagementTool.Application.Services
                     Errors = new String[]{"No task present with the given Id."}
                 };
             
+            if (userId == null) 
+            return new ResponseDto()
+                {
+                    Succeeded = false,
+                    Errors = new String[]{"Cannot assign null Id."}
+                };
+            
             task.AssignedUserId = userId;
 
             var success = await _taskRepo.UpdateTaskAsync(task);
@@ -52,6 +59,7 @@ namespace TaskManagementTool.Application.Services
                         Id = task.TaskItemId,
                         Title = task.Title,
                         TaskStatus = task.TaskStatus,
+                        UserName = (await _identityRepo.FindByIdAsync(task.AssignedUserId))?.UserName
                     });
                 }
 
@@ -68,24 +76,49 @@ namespace TaskManagementTool.Application.Services
             try
             {
                 var users = await _identityRepo.GetAllUsers();
-                var userdtos = new List<UserDto>();
+                // var userdtos = new List<UserDto>();
 
-                foreach (var user in users)
-                {
-                    var userdto = new UserDto()
-                    {
-                        UserId = user.UserId,
-                        UserName = user.UserName,
-                        Email = user.Email
-                    };
+                // foreach (var user in users)
+                // {
+                //     var userdto = new UserDto()
+                //     {
+                //         UserId = user.UserId,
+                //         UserName = user.UserName,
+                //         Email = user.Email
+                //     };
 
-                    userdtos.Add(userdto);
-                }
+                //     userdtos.Add(userdto);
+                // }
 
-                return userdtos;
+                return users;
             } catch(Exception ex)
             {
                 _logger.LogError(ex, "User fetch for Admin failed");
+                throw;
+            }
+        }
+
+        public async Task<UserDto?> GetTaskUser(int taskId)
+        {
+            try
+            {
+                    var task = await _taskRepo.GetTaskById(taskId);
+
+                if (task == null) return null;
+                var user = await _identityRepo.FindByIdAsync(task.AssignedUserId);
+
+                if (user == null) return null;
+                var userdto = new UserDto
+                {
+                    UserId = task.AssignedUserId,
+                    UserName = user.UserName,
+                    Email = user.Email
+                };
+
+                return userdto;
+            } catch(Exception ex)
+            {
+                _logger.LogError(ex, "User fetch for Admin by taskId failed");
                 throw;
             }
         }

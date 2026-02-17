@@ -4,6 +4,7 @@ using TaskManagementTool.Application.DTOs;
 using TaskManagementTool.Application.Interfaces;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using System.Net.Mail;
 
 namespace TaskManagementTool.Application.Services
 {
@@ -42,6 +43,15 @@ namespace TaskManagementTool.Application.Services
 
             if (string.IsNullOrWhiteSpace(dto.Email))
                 errors.Add("Email is required.");
+
+            try{
+                var mailAddress = new MailAddress(dto.Email);
+            }
+            catch (FormatException ex)
+            {
+                errors.Add("Invalid Email Format.");
+                _logger.LogError(ex, "Invalid Email Format");
+            }
 
             if (string.IsNullOrWhiteSpace(dto.UserName))
                 errors.Add("Username is required.");
@@ -107,6 +117,16 @@ namespace TaskManagementTool.Application.Services
             if (response.Succeeded)
             {
                 var token = await _jwtTokenService.GenerateTokenAsync(dto.Email);
+
+                if (!dto.RememberMe)
+                {
+                    return new LoginResponseDto
+                    {
+                        Succeeded = true,
+                        Token = token,
+                        RefreshToken = null
+                    };
+                }
                 var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
                 var saved = await _refreshTokenRepo.AddAsync(ComputeTokenHash(refreshToken), dto.Email);

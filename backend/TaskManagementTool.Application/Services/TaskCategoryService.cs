@@ -91,7 +91,7 @@ namespace TaskManagementTool.Application.Services
             var result = await _categoryRepo.DeleteCategory(category);
 
             return result ? new ResponseDto(){Succeeded=true} : new ResponseDto(){
-                Succeeded = true,
+                Succeeded = false,
                 Errors = new String[]{"An unknown Error occured"}
             };
         }
@@ -100,12 +100,23 @@ namespace TaskManagementTool.Application.Services
         {
             var category = await _categoryRepo.GetCategoryByName(dto.Name);
 
-            if (category == null) 
+            if (category != null && category.TaskCategoryId != categoryId)
                 return new ResponseDto
                 {
                     Succeeded = false,
                     Errors = new String[] {"Category with same name already exists."}
                 };
+
+            category = await _categoryRepo.GetCategory(categoryId);
+
+            if (category == null)
+            {
+                return new ResponseDto
+                {
+                    Succeeded = false,
+                    Errors = new String[] {"Category doesn't exists with this Id."}
+                };
+            }
 
             var result = await _categoryRepo.UpdateCategory(category, dto);
 
@@ -114,5 +125,5 @@ namespace TaskManagementTool.Application.Services
                 Errors = new String[]{"An unknown Error occured."}
             };
         }
-    } 
+    }   
 }

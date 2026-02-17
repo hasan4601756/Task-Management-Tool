@@ -7,5 +7,6 @@ namespace TaskManagementTool.Application.Interfaces
         Task<IEnumerable<UserDto>> GetAllUsers();
         Task<IEnumerable<TaskDto>> GetAllTasks();
         Task<ResponseDto> AssignTask(string userId, int taskId);
+        Task<UserDto?> GetTaskUser(int taskId);
     }
 }

@@ -48,6 +48,27 @@ namespace TaskManagementTool.API.Controllers
             return Ok(tasks);
         }
 
+        [HttpGet("tasks/{taskId:int}/user")]
+        public async Task<ActionResult<UserDto?>> GetTaskUSer(int taskId)
+        {
+            var adminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation(
+                "GetTaskId requested for assigning Task {TaskId} by Admin {AdminId}", 
+                taskId, adminId
+            );
+
+            var user = await _adminService.GetTaskUser(taskId);
+
+            if (user == null) return Ok(new UserDto
+            {
+                UserId = null,
+                UserName = "Deleted",
+                Email = null
+            });
+
+            return Ok(user);
+        }
+
         [HttpPut("assigntask/{taskId:int}/{userId}")]
         public async Task<ActionResult<ResponseDto>> AssignTask(string userId, int taskId)
         {

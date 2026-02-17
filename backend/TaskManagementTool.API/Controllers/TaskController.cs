@@ -31,12 +31,14 @@ namespace TaskManagementTool.API.Controllers{
         public async Task<ActionResult> Dashboard()
         {
             var userId = GetUserId();
+            
+            var isAdmin = User.IsInRole("Admin");
 
             _logger.LogInformation(
                 "Dashboard requested by User {UserId}",
                 userId);
 
-            var dashboard = await _taskService.GetDashboardAsync(userId);
+            var dashboard = await _taskService.GetDashboardAsync(userId, isAdmin);
 
             _logger.LogInformation(
                 "Dashboard completed for User {UserId}",

@@ -8,5 +8,6 @@ namespace TaskManagementTool.Application.DTOs{
         public DateOnly DueDate {get; set;}
         public TaskItemStatus Status {get; set;}
         public int CategoryId {get; set;}
+        public TaskPriority Priority {get; set;}
     }
 }

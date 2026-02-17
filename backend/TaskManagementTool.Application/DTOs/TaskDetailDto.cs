@@ -11,5 +11,6 @@ namespace TaskManagementTool.Application.DTOs{
         public int CategoryId {get; set;}
         public string CategoryName {get; set;}
         public string? CategoryDescription {get; set;}
+        public TaskPriority Priority {get; set;}
     }
 }

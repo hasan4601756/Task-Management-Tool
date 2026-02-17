@@ -26,7 +26,8 @@ namespace TaskManagementTool.Application.Services
                 CreationDate = DateTime.UtcNow,
                 AssignedUserId = userId,
                 TaskCategoryId = dto.CategoryId,
-                TaskStatus = TaskItemStatus.Pending
+                TaskStatus = TaskItemStatus.Pending,
+                Priority = dto.Priority
             };
 
             var success = await _taskRepo.AddTaskAsync(task);
@@ -53,6 +54,7 @@ namespace TaskManagementTool.Application.Services
                         Id = task.TaskItemId,
                         Title = task.Title,
                         TaskStatus = task.TaskStatus,
+                        Priority = task.Priority
                     });
                 }
 
@@ -83,7 +85,8 @@ namespace TaskManagementTool.Application.Services
                         TaskStatus = task.TaskStatus,
                         CategoryId = task.TaskCategoryId,
                         CategoryName = task.Category?.Name,
-                        CategoryDescription = task.Category?.Description
+                        CategoryDescription = task.Category?.Description,
+                        Priority = task.Priority
                 }; 
             } catch(Exception ex)
             {
@@ -140,6 +143,7 @@ namespace TaskManagementTool.Application.Services
             task.DueDate = dto.DueDate;
             task.TaskStatus = dto.Status;
             task.TaskCategoryId = dto.CategoryId;
+            task.Priority = dto.Priority;
 
             var success = await _taskRepo.UpdateTaskAsync(task);
 
@@ -150,9 +154,16 @@ namespace TaskManagementTool.Application.Services
             };
         }
 
-        public async Task<DashboardDto> GetDashboardAsync(string userId)
+        public async Task<DashboardDto> GetDashboardAsync(string userId, bool isAdmin=false)
         {
-            var tasks = await _taskRepo.GetTasksByUserAsync(userId);
+            IEnumerable<TaskItem>? tasks = null;
+            if (isAdmin){
+                tasks = await _taskRepo.GetAllTasks();
+            }
+            else
+            {
+                tasks = await _taskRepo.GetTasksByUserAsync(userId);
+            }
 
             var counts = tasks
                 .GroupBy(t => t.TaskStatus)

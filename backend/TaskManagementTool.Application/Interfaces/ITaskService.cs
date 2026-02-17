@@ -8,6 +8,6 @@ namespace TaskManagementTool.Application.Interfaces{
         Task<IEnumerable<TaskDto>> GetAllAsync(string userId);
         Task<TaskDetailDto?> GetAsync(int taskId, string userId);
         Task<ResponseDto> RemoveAsync(int taskId, string userId, bool isAdmin);
-        Task<DashboardDto> GetDashboardAsync(string userId);
+        Task<DashboardDto> GetDashboardAsync(string userId, bool isAdmin=false);
     }
 }
