@@ -92,7 +92,7 @@ jobs:
       - name: Run React Tests
         run: |
           cd frontend
-          npm test -- --coverage --watchAll=false
+          npm test -- --watchAll=false --coverage
 
       # -------------------------
       # End SonarCloud analysis
