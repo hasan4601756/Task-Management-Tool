@@ -60,7 +60,7 @@ namespace TaskManagementTool.Tests.Controllers
             };
 
             _taskServiceMock
-                .Setup(x => x.GetDashboardAsync("user1"))
+                .Setup(x => x.GetDashboardAsync("user1", false))
                 .ReturnsAsync(dashboard);
 
             var result = await _controller.Dashboard();
