@@ -1,0 +1,97 @@
+name: SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # -------------------------
+      # Setup .NET
+      # -------------------------
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      # -------------------------
+      # Setup Node (for React)
+      # -------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # -------------------------
+      # Install SonarCloud scanner
+      # -------------------------
+      - name: Install SonarCloud scanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Add dotnet tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      # -------------------------
+      # Begin SonarCloud analysis
+      # -------------------------
+      - name: SonarCloud Begin
+        run: |
+          dotnet sonarscanner begin \
+            /k:"YOUR_PROJECT_KEY" \
+            /o:"YOUR_ORG_KEY" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+      
+      # -------------------------
+      # Build .NET
+      # -------------------------
+      - name: Restore .NET dependencies
+        run: dotnet restore
+
+      - name: Build .NET
+        run: dotnet build --no-restore
+
+      # -------------------------
+      # Run .NET Tests with coverage
+      # -------------------------
+      - name: Test .NET with coverage
+        run: |
+          dotnet test --no-build \
+          --collect:"XPlat Code Coverage"
+
+      # -------------------------
+      # Build React App
+      # -------------------------
+      - name: Install React dependencies
+        run: |
+          cd ClientApp
+          npm install
+
+      - name: Build React
+        run: |
+          cd ClientApp
+          npm run build
+
+      - name: Run React Tests
+        run: |
+          cd ClientApp
+          npm test -- --coverage --watchAll=false
+
+      # -------------------------
+      # End SonarCloud analysis
+      # -------------------------
+      - name: SonarCloud End
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
