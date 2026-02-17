@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # -------------------------
+      # Checkout code
+      # -------------------------
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -27,7 +30,7 @@ jobs:
           dotnet-version: 8.0.x
 
       # -------------------------
-      # Setup Node (for React)
+      # Setup Node.js
       # -------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -53,45 +56,46 @@ jobs:
             /o:"hasan4601756" \
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-      
+            /d:sonar.cs.vscoveragexml.reportsPaths="**/TestResults/*/coverage.cobertura.xml"
+
+      # -------------------------
+      # Restore .NET dependencies
+      # -------------------------
+      - name: Restore .NET dependencies
+        run: dotnet restore backend/TaskManagementTool.sln
+
       # -------------------------
       # Build .NET
       # -------------------------
-      - name: Restore .NET dependencies
-        run: dotnet restore
-
       - name: Build .NET
-        run: dotnet build --no-restore
+        run: dotnet build backend/TaskManagementTool.sln --no-restore
 
       # -------------------------
       # Run .NET Tests with coverage
       # -------------------------
       - name: Test .NET with coverage
-        run: |
-          dotnet test --no-build \
-          --collect:"XPlat Code Coverage"
+        run: dotnet test backend/TaskManagementTool.sln --no-build --collect:"XPlat Code Coverage"
 
       # -------------------------
       # Build React App
       # -------------------------
       - name: Install React dependencies
         run: |
-          cd ClientApp
+          cd frontend
           npm install
 
       - name: Build React
         run: |
-          cd ClientApp
+          cd frontend
           npm run build
 
       - name: Run React Tests
         run: |
-          cd ClientApp
+          cd frontend
           npm test -- --coverage --watchAll=false
 
       # -------------------------
       # End SonarCloud analysis
       # -------------------------
       - name: SonarCloud End
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
