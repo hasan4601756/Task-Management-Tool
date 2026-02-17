@@ -51,7 +51,7 @@ jobs:
           dotnet sonarscanner begin \
             /k:"hasan4601756_Task-Management-Tool" \
             /o:"hasan4601756" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
       
