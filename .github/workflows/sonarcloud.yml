@@ -49,8 +49,8 @@ jobs:
       - name: SonarCloud Begin
         run: |
           dotnet sonarscanner begin \
-            /k:"YOUR_PROJECT_KEY" \
-            /o:"YOUR_ORG_KEY" \
+            /k:"hasan4601756_Task-Management-Tool" \
+            /o:"hasan4601756" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
