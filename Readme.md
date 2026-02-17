@@ -54,7 +54,7 @@
 
 ### Testing & Code Quality
 - Unit testing using xUnit
-- Static code analysis with SonarQube
+- Static code analysis with SonarQube (SonarCloud)
 
 ---
 
