@@ -14,10 +14,10 @@ const Logout = () => {
                 if (localStorage.getItem(REFRESH_TOKEN) != null){
                     await api.post("api/Account/logout");
                 }
-                logout();
             } catch (error) {
                 console.error("Logout failed:", error);
             } finally {
+                logout();
                 navigate("/login", { replace: true });
             }
         };
@@ -29,3 +29,4 @@ const Logout = () => {
 };
 
 export default Logout;
+
