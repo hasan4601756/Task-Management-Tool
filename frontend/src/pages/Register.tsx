@@ -65,7 +65,7 @@ function Register(){
         try {
             const res = await api.post('/api/Account/register', state);
             if (res.status === 200) {
-                navigate('/login');
+                navigate('/users');
             }
         } catch (error) {
             setException('Registration failed. Please try again.');
@@ -171,5 +171,6 @@ function Register(){
         </main>
     );
 }
+
 
 export default Register;
