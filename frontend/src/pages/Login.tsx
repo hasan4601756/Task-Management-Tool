@@ -57,7 +57,7 @@ function Login(){
                     });
 
                 if (response.status == 200){
-                    if ("Admin" in response.data) isAdmin = true;
+                    if (response.data.includes("Admin")) isAdmin = true;
                     else isAdmin = false;
                 } else {
                     console.log("Error getting user role.");
@@ -152,5 +152,6 @@ function Login(){
         </main>
     );
 }
+
 
 export default Login;
