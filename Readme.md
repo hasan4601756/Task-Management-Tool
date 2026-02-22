@@ -77,15 +77,15 @@
 ```bash
 cd backend
 dotnet restore
-dotnet ef database update
-dotnet run
+dotnet ef database update --project TaskManagementTool.Infrastructure --startup-project TaskManagementTool.API
+dotnet run --project TaskManagementTool.API
 ```
 
 ### Frontend
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
 ## Future Enhancements
