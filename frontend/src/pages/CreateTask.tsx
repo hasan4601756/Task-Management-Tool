@@ -23,7 +23,7 @@ const initialState: CreateTaskType = {
     title: "",
     description: "",
     due_date: "",
-    category_id: 0,
+    categoryId: 0,
     priority: -1
 };
 
@@ -36,7 +36,7 @@ function reducer(state: CreateTaskType, action: Action): CreateTaskType {
         case "SET_DUEDATE":
             return { ...state, due_date: action.payload };
         case "SET_CATEGORY":
-            return { ...state, category_id: action.payload };
+            return { ...state, categoryId: action.payload };
         case "SET_PRIORITY":
             return { ...state, priority: action.payload };
         case "RESET":
@@ -80,9 +80,16 @@ function CreateTask() {
             title: state.title,
             description: state.description,
             due_date: state.due_date ? new Date(state.due_date).toISOString() : "",
-            category_id: state.category_id,
+            categoryId: state.categoryId,
             priority: state.priority
         };
+        if (newTask.categoryId == 0) {
+            alert("Please select a valid category.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        console.log(newTask);
 
         try{
             const res = await api.post("api/Task/add", newTask);
@@ -184,7 +191,7 @@ function CreateTask() {
                         <select
                             id="category"
                             className="category-select"
-                            value={state.category_id}
+                            value={state.categoryId}
                             onChange={(e) =>
                                 dispatch({
                                     type: "SET_CATEGORY",
@@ -194,10 +201,10 @@ function CreateTask() {
                             required
                             disabled={isSubmitting}
                         >
-                            <option value="" disabled>Select a category</option>
+                            <option value="0" disabled>Select a category</option>
                             {categories.map((category) => (
                                 <option key={category.taskCategoryId} value={category.taskCategoryId}>
-                                    {category.name}
+                                    {category.name} {state.categoryId}
                                 </option>
                             ))}
                         </select>
