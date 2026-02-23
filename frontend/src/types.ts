@@ -1,7 +1,7 @@
 export type CreateTaskType = {
     title: string;
     description: string;
-    due_date: string;
+    dueDate: string;
     categoryId: number;
     priority: number;
 };
@@ -69,3 +69,4 @@ export type NavigationType = {
   link: string
 
 };
+
