@@ -24,7 +24,7 @@ const initialState: CreateTaskType = {
     description: "",
     due_date: "",
     categoryId: 0,
-    priority: -1
+    priority: 0
 };
 
 function reducer(state: CreateTaskType, action: Action): CreateTaskType {
@@ -224,3 +224,4 @@ function CreateTask() {
 }
 
 export default CreateTask;
+
