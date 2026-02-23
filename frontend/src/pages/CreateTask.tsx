@@ -22,7 +22,7 @@ type Action =
 const initialState: CreateTaskType = {
     title: "",
     description: "",
-    due_date: "",
+    dueDate: "",
     categoryId: 0,
     priority: 0
 };
@@ -34,7 +34,7 @@ function reducer(state: CreateTaskType, action: Action): CreateTaskType {
         case "SET_DESCRIPTION":
             return { ...state, description: action.payload };
         case "SET_DUEDATE":
-            return { ...state, due_date: action.payload };
+            return { ...state, dueDate: action.payload };
         case "SET_CATEGORY":
             return { ...state, categoryId: action.payload };
         case "SET_PRIORITY":
@@ -79,7 +79,7 @@ function CreateTask() {
         const newTask : CreateTaskType = {
             title: state.title,
             description: state.description,
-            due_date: state.due_date ? new Date(state.due_date).toISOString() : "",
+            dueDate: state.dueDate ? new Date(state.dueDate).toISOString() : "",
             categoryId: state.categoryId,
             priority: state.priority
         };
@@ -174,7 +174,7 @@ function CreateTask() {
                         <input
                             id="dueDate"
                             type="date"
-                            value={state.due_date}
+                            value={state.dueDate}
                             onChange={(e) =>
                                 dispatch({
                                     type: "SET_DUEDATE",
@@ -224,4 +224,5 @@ function CreateTask() {
 }
 
 export default CreateTask;
+
 
